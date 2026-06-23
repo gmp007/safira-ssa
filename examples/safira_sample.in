@@ -1,0 +1,55 @@
+# SAFIRA-SSA sample input for a fast local smoke run.
+
+[workflow]
+fetch_data = false
+train_model = false
+forecast = false
+make_plots = false
+zip_figures = false
+write_sample_data = true
+
+[paths]
+data_file = examples/sample_sai_panel.xlsx
+sheet_name = All_Indicators
+figures_dir = examples/figures
+model_weights = examples/models/time_series_sai_model_weights.pth
+model_assets = examples/models/time_series_sai_assets.pkl
+legacy_model = examples/models/time_series_sai_model.pth
+sample_data_file = examples/sample_sai_panel.xlsx
+world_file =
+
+[data]
+start_year = 2000
+end_year = 2011
+countries = SSA
+validate_country_codes = false
+connectivity_check = false
+
+[model]
+lookback = 3
+hidden_dim = 8
+num_layers = 1
+dropout = 0.0
+bidirectional = false
+epochs = 3
+early_stopping = true
+patience = 2
+min_delta = 1e-5
+batch_size = 4
+learning_rate = 1e-3
+use_pretrained = false
+plot_losses = false
+input_features = SAI_scaled
+
+[forecast]
+country = Nigeria
+year = 2013
+
+[plots]
+show = false
+selected = spaghetti, pillar_heatmap, box, corr, corr_lower, slope, nigeria_comparison, spaghetti_selected
+forecast_diag_countries = NGA, KEN
+selected_country_codes = KEN, RWA, GHA, ZAF, NGA
+nigeria_peers = RWA, KEN, GHA
+future_horizon = 3
+figures_zip = sample_figures.zip

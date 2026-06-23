@@ -1,0 +1,56 @@
+# SAFIRA-SSA input file
+# Lines beginning with # are comments. Values can be changed without editing Python code.
+
+[workflow]
+fetch_data = false
+train_model = true
+forecast = true
+make_plots = true
+zip_figures = true
+write_sample_data = false
+
+[paths]
+data_file = data/ssa_sai_all_indicators.xlsx
+sheet_name = All_Indicators
+figures_dir = figures
+model_weights = models/time_series_sai_model_weights.pth
+model_assets = models/time_series_sai_assets.pkl
+legacy_model = models/time_series_sai_model.pth
+sample_data_file = examples/sample_sai_panel.xlsx
+world_file =
+
+[data]
+start_year = 2000
+end_year = 2024
+countries = SSA
+validate_country_codes = true
+connectivity_check = false
+
+[model]
+lookback = 5
+hidden_dim = 32
+num_layers = 4
+dropout = 0.25
+bidirectional = false
+epochs = 1000
+early_stopping = false
+patience = 50
+min_delta = 1e-5
+batch_size = 16
+learning_rate = 1e-3
+use_pretrained = false
+plot_losses = false
+input_features = SAI_scaled
+
+[forecast]
+country = Nigeria
+year = 2025
+
+[plots]
+show = false
+selected = choropleth, spaghetti, pillar_heatmap, box, gdp_scatter, gdp_scatter_2020, gdp_scatter_highlight, gdp_scatter_top10, corr, corr_lower, slope, radar, umap, forecast_diag, nigeria_comparison, nigeria_comparison_seaborn, forecast_diag_zaf, spaghetti_selected, spaghetti_selected_alt, future_projection
+forecast_diag_countries = NGA, CIV, KEN, CMR, RWA, GHA
+selected_country_codes = KEN, RWA, GHA, ZAF, NGA, COD
+nigeria_peers = RWA, UGA, KEN, GHA
+future_horizon = 10
+figures_zip = figures.zip
