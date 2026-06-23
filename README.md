@@ -53,42 +53,65 @@ safira-ssa/
 
 ## Installation
 
-From the repository root:
+SAFIRA-SSA requires Python 3.10 or newer. Install from the repository root:
 
 ```bash
 pip install .
 ```
 
-For geospatial maps and UMAP plots, install the optional extras:
+That basic install is enough for data loading, SAI construction, model training, forecasting, and most plots. Optional install choices are:
+
+| Command | What it adds |
+| --- | --- |
+| `pip install .` | Core package, CLI, packaged data, training, forecasting, and standard plots. |
+| `pip install ".[geo]"` | Geospatial dependencies for choropleth map plotting. |
+| `pip install ".[umap]"` | UMAP dependency for latent country-cluster plots. |
+| `pip install ".[full]"` | Both geospatial and UMAP optional plotting dependencies. |
+| `pip install ".[dev]"` | Developer tools for tests, source/wheel builds, and package checks. |
+| `pip install ".[full,dev]"` | Everything needed for full plotting plus development checks. |
+
+The quotes around extras are recommended on macOS shells such as `zsh`.
+
+After installation, the command-line tool is:
 
 ```bash
-pip install ".[full]"
+safira
 ```
 
-For development tests and packaging checks:
+To confirm the CLI is visible:
 
 ```bash
-pip install ".[dev]"
+safira --help
 ```
 
 ## Quick Start
 
-Create or refresh the default input file:
+The default workflow uses the packaged World Bank snapshot, so it can run without downloading data from the internet.
+
+Create or refresh the editable input file:
 
 ```bash
 safira write-input --output safira.in --overwrite
 ```
 
-Run the workflow described by the input file:
+Run the workflow described by `safira.in`:
 
 ```bash
 safira run --input safira.in
 ```
 
-The default `safira.in` uses the packaged snapshot, so this command can run without internet access after installation. To refresh the World Bank data into `data/ssa_sai_all_indicators.xlsx`, set `data_mode = download` in `safira.in` or run only the download step:
+The run can train the model, produce the requested forecast, make figures, and zip the figures depending on the switches in `[workflow]`.
+
+To download fresh World Bank data before a run:
 
 ```bash
 safira fetch-data --input safira.in
+```
+
+That command writes the downloaded panel to the file named by `[paths] data_file`, usually:
+
+```text
+data/ssa_sai_all_indicators.xlsx
 ```
 
 Write the deterministic sample panel used by examples and tests:
@@ -97,33 +120,233 @@ Write the deterministic sample panel used by examples and tests:
 safira write-sample-data --output examples/sample_sai_panel.xlsx
 ```
 
+## CLI Commands
+
+The command line has four main commands:
+
+| Command | What it does |
+| --- | --- |
+| `safira run --input safira.in` | Runs the workflow described in the input file. Depending on `[workflow]`, this can download data, train, forecast, plot, and zip figures. |
+| `safira fetch-data --input safira.in` | Downloads only the World Bank panel and writes it to `[paths] data_file`. It does not train, forecast, or plot. |
+| `safira write-input --output safira.in --overwrite` | Writes a fresh editable input file. Use this if you want to restore the default configuration. |
+| `safira write-sample-data --output examples/sample_sai_panel.xlsx` | Writes a small synthetic data file for quick package checks. This is not research data. |
+
 ## The `safira.in` Input File
 
 The input file is the main user-facing control surface. It lets users run the same workflow in different ways without editing Python code.
 
-Important sections:
+SAFIRA-SSA input files use the simple `.ini` format:
 
-- `[workflow]`: switches for data source mode, training the model, forecasting, plotting, zipping figures, and writing sample data.
-- `[paths]`: locations for the custom/downloaded data file, packaged data URI, model weights, model assets, legacy model file, figures directory, sample data file, and optional Natural Earth world file.
-- `[data]`: World Bank years, country selection, country-code validation, and optional connectivity check.
-- `[model]`: LSTM lookback, hidden dimension, layers, dropout, epochs, learning rate, early stopping, batch size, and input features.
-- `[forecast]`: country and year requested for forecast or historical SAI lookup.
-- `[plots]`: selected plot routines and country lists for comparison plots.
+- Section names appear in square brackets, for example `[workflow]`.
+- Each setting is written as `name = value`.
+- `true` and `false` are used for on/off choices.
+- Lists are comma-separated, for example `NGA, KEN, GHA`.
+- Relative paths are interpreted from the directory where you run the command.
+- Lines beginning with `#` are comments.
+
+You can create a fresh copy at any time:
+
+```bash
+safira write-input --output safira.in --overwrite
+```
 
 The default `safira.in` follows the original notebook defaults as closely as possible: the packaged 2000-2025 World Bank snapshot, univariate `SAI_scaled` LSTM input, Nigeria 2025 forecast, and the full plot set from the notebook's “MAIN - call whichever plots you want” block.
 
-The data source is controlled by one line:
+### Common Data Setups
+
+Use the packaged offline snapshot:
 
 ```ini
 [workflow]
 data_mode = packaged
 ```
 
-Available modes:
+This is the safest first run because it does not require internet access.
 
-- `packaged`: use the offline snapshot installed inside the Python package.
-- `download`: download the requested World Bank panel to `[paths] data_file`, then use that file.
-- `custom`: use the user-supplied file at `[paths] data_file`.
+Download fresh World Bank data and run everything in one command:
+
+```ini
+[workflow]
+data_mode = download
+```
+
+```bash
+safira run --input safira.in
+```
+
+SAFIRA-SSA will first download the requested World Bank panel to `[paths] data_file`, then use that file for training, forecasting, and plotting.
+
+Download fresh World Bank data first, then run later from the downloaded file:
+
+```ini
+[workflow]
+data_mode = download
+```
+
+```bash
+safira fetch-data --input safira.in
+```
+
+After the download finishes, change only this line:
+
+```ini
+[workflow]
+data_mode = custom
+```
+
+Then run:
+
+```bash
+safira run --input safira.in
+```
+
+This two-step approach is useful when you want to confirm that the data download succeeded before spending time on training and plotting.
+
+Use your own Excel or CSV panel:
+
+```ini
+[workflow]
+data_mode = custom
+
+[paths]
+data_file = path/to/your_panel.xlsx
+```
+
+Custom Excel files should contain the `All_Indicators` sheet unless `[paths] sheet_name` is changed. CSV files are also supported.
+
+### Complete Input Reference
+
+Every option in the default `safira.in` is described below.
+
+#### `[workflow]`
+
+Controls which major steps run.
+
+| Option | Default | Meaning |
+| --- | --- | --- |
+| `data_mode` | `packaged` | Chooses the data source. Use `packaged`, `download`, or `custom`. |
+| `train_model` | `true` | Trains an LSTM model from the selected data. |
+| `forecast` | `true` | Produces the requested country-year forecast or historical lookup. |
+| `make_plots` | `true` | Generates the plot names listed in `[plots] selected`. |
+| `zip_figures` | `true` | Creates a zip archive of generated figures. |
+| `write_sample_data` | `false` | Writes a small deterministic sample file to `[paths] sample_data_file`. Useful for smoke tests. |
+
+`data_mode` choices:
+
+| Value | What happens |
+| --- | --- |
+| `packaged` | Uses the snapshot installed inside the package at `[paths] packaged_data_file`. No internet required. |
+| `download` | Downloads World Bank data to `[paths] data_file`, then uses that downloaded file. Internet required. |
+| `custom` | Uses the existing file at `[paths] data_file`. No download is attempted. |
+
+#### `[paths]`
+
+Controls where files are read from and written to.
+
+| Option | Default | Meaning |
+| --- | --- | --- |
+| `data_file` | `data/ssa_sai_all_indicators.xlsx` | Local Excel or CSV file used when `data_mode = custom`; also the output file created when `data_mode = download` or `safira fetch-data` is used. |
+| `packaged_data_file` | `package://safira/resources/safira_ssa_worldbank_snapshot.xlsx` | Built-in offline World Bank snapshot used when `data_mode = packaged`. |
+| `sheet_name` | `All_Indicators` | Excel sheet containing the wide country-year indicator panel. Ignored for CSV files. |
+| `figures_dir` | `figures` | Directory where plots are saved. Created automatically if needed. |
+| `model_weights` | `models/time_series_sai_model_weights.pth` | PyTorch model weights file written after training and read when loading a saved model. |
+| `model_assets` | `models/time_series_sai_assets.pkl` | Non-tensor model assets such as scalers, feature names, and training settings. |
+| `legacy_model` | `models/time_series_sai_model.pth` | Legacy single-file model path kept for compatibility with older notebook-style saves. |
+| `sample_data_file` | `examples/sample_sai_panel.xlsx` | Output path used when `write_sample_data = true` or when running `safira write-sample-data`. |
+| `world_file` | blank | Optional local Natural Earth world boundary file for choropleth maps. Leave blank unless you have a local map file. |
+
+#### `[data]`
+
+Controls World Bank downloads. These settings matter only when `data_mode = download` or `safira fetch-data` is used.
+
+| Option | Default | Meaning |
+| --- | --- | --- |
+| `start_year` | `2000` | First year requested from the World Bank API. |
+| `end_year` | `2026` | Last year requested from the World Bank API. If the World Bank has no values for the latest year yet, the downloaded file will simply stop at the latest available year. |
+| `countries` | `SSA` | Countries to download. Use `SSA` for the built-in Sub-Saharan Africa country list, or provide comma-separated ISO3 codes such as `NGA, KEN, GHA`. |
+| `validate_country_codes` | `true` | Checks country codes against the World Bank before downloading. Invalid codes are ignored with a warning. |
+| `connectivity_check` | `false` | Runs a quick test download for one Nigeria GDP-growth series before the full download. Useful for diagnosing internet/API access. |
+
+#### `[model]`
+
+Controls the LSTM forecasting model.
+
+| Option | Default | Meaning |
+| --- | --- | --- |
+| `lookback` | `5` | Number of past yearly observations used to predict the next SAI value. |
+| `hidden_dim` | `32` | Width of the LSTM hidden layer. Larger values can model more complexity but may train more slowly. |
+| `num_layers` | `4` | Number of stacked LSTM layers. |
+| `dropout` | `0.25` | Dropout rate used for regularization. Use `0.0` to disable dropout. |
+| `bidirectional` | `false` | Whether to use a bidirectional LSTM. For forecasting, `false` is the conservative default. |
+| `epochs` | `1000` | Maximum number of training epochs. Reduce this for quick tests. |
+| `early_stopping` | `false` | Stops training early when validation loss stops improving. |
+| `patience` | `50` | Number of epochs to wait for improvement when early stopping is enabled. |
+| `min_delta` | `1e-5` | Minimum validation-loss improvement counted by early stopping. |
+| `batch_size` | `16` | Number of training sequences per optimization batch. |
+| `learning_rate` | `1e-3` | Optimizer learning rate. |
+| `use_pretrained` | `false` | Loads existing model weights and assets instead of training from scratch. Requires files at `model_weights` and `model_assets`. |
+| `plot_losses` | `false` | Shows or saves training-loss diagnostics when supported by the runtime. |
+| `input_features` | `SAI_scaled` | Comma-separated model input features. The default univariate model uses scaled SAI only. |
+
+For a quick test run, set:
+
+```ini
+[model]
+epochs = 1
+hidden_dim = 8
+num_layers = 1
+dropout = 0.0
+```
+
+#### `[forecast]`
+
+Controls the printed forecast result.
+
+| Option | Default | Meaning |
+| --- | --- | --- |
+| `country` | `Nigeria` | Country to forecast or look up. A country name or recognized ISO3-style alias can be used. |
+| `year` | `2025` | Target year. If the year is already in the prepared data, SAFIRA-SSA reports the observed SAI; otherwise it forecasts forward. |
+
+#### `[plots]`
+
+Controls figure generation.
+
+| Option | Default | Meaning |
+| --- | --- | --- |
+| `show` | `false` | Whether plots should open interactively. Keep `false` for batch runs and servers. |
+| `selected` | full notebook plot list | Comma-separated plot names to generate. Remove names to make a shorter run. |
+| `forecast_diag_countries` | `NGA, CIV, KEN, CMR, RWA, GHA` | Countries used by `forecast_diag`. Requires saved model weights and assets. |
+| `selected_country_codes` | `KEN, RWA, GHA, ZAF, NGA, COD` | Countries highlighted by selected spaghetti plots. |
+| `nigeria_peers` | `RWA, UGA, KEN, GHA` | Peer countries used by Nigeria comparison plots. |
+| `future_horizon` | `10` | Number of future years used by `future_projection`. |
+| `figures_zip` | `figures.zip` | Name or path for the zip archive created when `zip_figures = true`. |
+
+Available values for `[plots] selected`:
+
+```text
+choropleth
+spaghetti
+pillar_heatmap
+box
+gdp_scatter
+gdp_scatter_2020
+gdp_scatter_highlight
+gdp_scatter_top10
+corr
+corr_lower
+slope
+radar
+umap
+forecast_diag
+nigeria_comparison
+nigeria_comparison_seaborn
+forecast_diag_zaf
+spaghetti_selected
+spaghetti_selected_alt
+future_projection
+```
+
+Plots that require unavailable optional dependencies or missing model files are skipped with a warning so the rest of the plot batch can continue.
 
 ## Data Workflow
 
@@ -175,18 +398,6 @@ SAI
 country_code
 ```
 
-To work with your own panel, set:
-
-```ini
-[workflow]
-data_mode = custom
-
-[paths]
-data_file = path/to/your_panel.xlsx
-```
-
-Custom Excel files should contain the `All_Indicators` sheet unless `[paths] sheet_name` is changed. CSV files are also supported.
-
 ## Forecasting Workflow
 
 The forecasting class is `safira.forecast.SkillAdvancementForecaster`. The legacy notebook class name `psai` remains available as an alias.
@@ -218,29 +429,23 @@ print(result.value)
 
 ## Plot Selection
 
-The `[plots] selected` line in `safira.in` controls which figures are produced. Available plot names are:
+The `[plots] selected` line in `safira.in` controls which figures are produced. The full list of available plot names is documented in the `[plots]` part of the complete input reference above.
 
-```text
-choropleth
-spaghetti
-pillar_heatmap
-box
-gdp_scatter
-gdp_scatter_2020
-gdp_scatter_highlight
-gdp_scatter_top10
-corr
-corr_lower
-slope
-radar
-umap
-forecast_diag
-nigeria_comparison
-nigeria_comparison_seaborn
-forecast_diag_zaf
-spaghetti_selected
-spaghetti_selected_alt
-future_projection
+For a short plotting run, use only a few names:
+
+```ini
+[plots]
+selected = spaghetti, box, corr_lower
+```
+
+For the full notebook-style plotting run, keep the default list:
+
+```ini
+[workflow]
+make_plots = true
+
+[plots]
+selected = choropleth, spaghetti, pillar_heatmap, box, gdp_scatter, gdp_scatter_2020, gdp_scatter_highlight, gdp_scatter_top10, corr, corr_lower, slope, radar, umap, forecast_diag, nigeria_comparison, nigeria_comparison_seaborn, forecast_diag_zaf, spaghetti_selected, spaghetti_selected_alt, future_projection
 ```
 
 Plots that require unavailable optional dependencies or missing model files are skipped with an explicit warning. This allows long figure batches to continue when, for example, geospatial dependencies are not installed.
@@ -282,7 +487,13 @@ The tests focus on deterministic pieces that should work without network access:
 
 ## Packaging
 
-Build a source distribution and wheel:
+Install the development extras before running packaging checks:
+
+```bash
+pip install ".[dev]"
+```
+
+Build a source distribution and wheel from the repository root:
 
 ```bash
 python -m build
@@ -298,6 +509,12 @@ Install locally from the working tree:
 
 ```bash
 pip install .
+```
+
+Install locally with all optional plotting dependencies:
+
+```bash
+pip install ".[full]"
 ```
 
 ## Notes on Reproducibility
