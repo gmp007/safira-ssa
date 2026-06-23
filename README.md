@@ -9,7 +9,7 @@ The code was refactored from the original `PSAIM_WB_Forecast.ipynb` notebook int
 ## Authors
 
 - **Chinedu Ekuma**
-- **Kelechi Ekuma**, collaborator
+- **Kelechi Ekuma**
 
 ## What SAFIRA-SSA Does
 
