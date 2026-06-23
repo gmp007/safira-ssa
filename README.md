@@ -2,7 +2,7 @@
 
 **Skill Advancement Forecasting and Intelligence for Readiness in Africa, Sub-Saharan Africa**
 
-SAFIRA-SSA packages the notebook workflow for *Forecasting the Future of Skills in Sub-Saharan Africa: AI, Automation, and the Skill Advancement Index* into a reusable Python project. It collects World Bank indicators, builds the Skill Advancement Index (SAI), trains or reloads an LSTM forecaster, produces country-year forecasts, and generates the figures used to compare SAI trajectories, pillars, regions, and country profiles.
+SAFIRA-SSA packages the notebook workflow for *Forecasting the Future of Skills in Sub-Saharan Africa: AI, Automation, and the Skill Advancement Index* into a reusable Python project. It uses a packaged World Bank snapshot by default, can refresh that data from the World Bank API when internet access is available, builds the Skill Advancement Index (SAI), trains or reloads an LSTM forecaster, produces country-year forecasts, and generates the figures used to compare SAI trajectories, pillars, regions, and country profiles.
 
 The code was refactored from the original `PSAIM_WB_Forecast.ipynb` notebook into a modern package layout so it can be installed with `pip install .`, run from a command line, tested, and hosted on GitHub/PyPI.
 
@@ -15,7 +15,7 @@ The code was refactored from the original `PSAIM_WB_Forecast.ipynb` notebook int
 
 SAFIRA-SSA supports a complete research-to-analysis workflow:
 
-1. Downloads a wide country-year panel of World Bank indicators for Sub-Saharan Africa.
+1. Loads a packaged country-year World Bank panel for Sub-Saharan Africa, or downloads a fresh panel on demand.
 2. Builds the **Skill Advancement Index (SAI)** on a 0 to 100 scale.
 3. Estimates four SAI dimensions:
    - **Foundational**: literacy and primary completion.
@@ -39,6 +39,7 @@ safira-ssa/
 │   ├── forecast.py     # Training, model loading, and forecasting
 │   ├── models.py       # PyTorch datasets and LSTM models
 │   ├── plotting.py     # All figure-generation routines
+│   ├── resources/      # Packaged offline World Bank snapshot and metadata
 │   └── sai.py          # SAI construction and country normalization
 ├── tests/              # Unit tests for index construction and config parsing
 ├── examples/           # Sample input for a fast local smoke run
@@ -84,7 +85,7 @@ Run the workflow described by the input file:
 safira run --input safira.in
 ```
 
-Run only the World Bank download step:
+The default `safira.in` uses the packaged snapshot, so this command can run without internet access after installation. To refresh the World Bank data into `data/ssa_sai_all_indicators.xlsx`, set `data_mode = download` in `safira.in` or run only the download step:
 
 ```bash
 safira fetch-data --input safira.in
@@ -102,18 +103,54 @@ The input file is the main user-facing control surface. It lets users run the sa
 
 Important sections:
 
-- `[workflow]`: switches for downloading data, training the model, forecasting, plotting, zipping figures, and writing sample data.
-- `[paths]`: locations for the data file, model weights, model assets, legacy model file, figures directory, sample data file, and optional Natural Earth world file.
+- `[workflow]`: switches for data source mode, training the model, forecasting, plotting, zipping figures, and writing sample data.
+- `[paths]`: locations for the custom/downloaded data file, packaged data URI, model weights, model assets, legacy model file, figures directory, sample data file, and optional Natural Earth world file.
 - `[data]`: World Bank years, country selection, country-code validation, and optional connectivity check.
 - `[model]`: LSTM lookback, hidden dimension, layers, dropout, epochs, learning rate, early stopping, batch size, and input features.
 - `[forecast]`: country and year requested for forecast or historical SAI lookup.
 - `[plots]`: selected plot routines and country lists for comparison plots.
 
-The default `safira.in` follows the original notebook defaults as closely as possible: 2000-2024 World Bank data, univariate `SAI_scaled` LSTM input, Nigeria 2025 forecast, and the full plot set from the notebook's “MAIN - call whichever plots you want” block.
+The default `safira.in` follows the original notebook defaults as closely as possible: the packaged 2000-2025 World Bank snapshot, univariate `SAI_scaled` LSTM input, Nigeria 2025 forecast, and the full plot set from the notebook's “MAIN - call whichever plots you want” block.
+
+The data source is controlled by one line:
+
+```ini
+[workflow]
+data_mode = packaged
+```
+
+Available modes:
+
+- `packaged`: use the offline snapshot installed inside the Python package.
+- `download`: download the requested World Bank panel to `[paths] data_file`, then use that file.
+- `custom`: use the user-supplied file at `[paths] data_file`.
 
 ## Data Workflow
 
-The full data workflow uses `pandas-datareader` to call the World Bank API. The indicator list lives in `src/safira/constants.py` and was extracted directly from the notebook to avoid transcription drift.
+The package ships with this offline data resource:
+
+```text
+package://safira/resources/safira_ssa_worldbank_snapshot.xlsx
+```
+
+The companion metadata file is:
+
+```text
+package://safira/resources/safira_ssa_worldbank_snapshot_metadata.json
+```
+
+The packaged snapshot was generated on **2026-06-23** from the World Bank API. It requests 2000-2026 data, and the resulting file currently contains 2000-2025 observations because 2026 country-year values were not yet present in the returned World Bank series at generation time.
+
+Snapshot contents:
+
+- 46 Sub-Saharan African countries.
+- 73 configured indicators.
+- 1,194 raw country-year rows.
+- 1,089 rows after SAI construction drops rows without enough pillar information.
+- World Development Indicators source last updated by World Bank on 2026-04-08.
+- Worldwide Governance Indicators source last updated by World Bank on 2026-03-18.
+
+Live refreshes use the official World Bank JSON API directly. Standard WDI indicators are read through the country-indicator endpoint, while the governance indicators are read from World Bank source `3`, Worldwide Governance Indicators, using the correct `GOV_WGI_*` source series IDs. The indicator list lives in `src/safira/constants.py` and was extracted directly from the notebook to avoid transcription drift.
 
 Default output:
 
@@ -138,6 +175,18 @@ SAI
 country_code
 ```
 
+To work with your own panel, set:
+
+```ini
+[workflow]
+data_mode = custom
+
+[paths]
+data_file = path/to/your_panel.xlsx
+```
+
+Custom Excel files should contain the `All_Indicators` sheet unless `[paths] sheet_name` is changed. CSV files are also supported.
+
 ## Forecasting Workflow
 
 The forecasting class is `safira.forecast.SkillAdvancementForecaster`. The legacy notebook class name `psai` remains available as an alias.
@@ -157,7 +206,7 @@ Programmatic example:
 from safira.forecast import SkillAdvancementForecaster
 
 model = SkillAdvancementForecaster(
-    data_path="data/ssa_sai_all_indicators.xlsx",
+    data_path="package://safira/resources/safira_ssa_worldbank_snapshot.xlsx",
     lookback=5,
     epochs=1000,
     input_features=["SAI_scaled"],
@@ -253,7 +302,8 @@ pip install .
 
 ## Notes on Reproducibility
 
-- World Bank data are live external data. Results can change if the World Bank revises historical series or adds newer years.
+- The packaged snapshot is fixed at build time so offline users can reproduce the bundled run. Use `data_mode = download` or `safira fetch-data` to refresh from the live World Bank API.
+- Live World Bank results can change if the World Bank revises historical series, changes indicator coverage, or adds newer years.
 - The notebook's original full workflow trains an LSTM, so exact model weights may vary unless the runtime, dependencies, random seeds, and hardware behavior are fixed.
 - The sample panel is synthetic and exists only for testing package mechanics. It is not a substitute for the World Bank data used in the actual research workflow.
 

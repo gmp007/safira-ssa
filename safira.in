@@ -2,7 +2,7 @@
 # Lines beginning with # are comments. Values can be changed without editing Python code.
 
 [workflow]
-fetch_data = false
+data_mode = packaged
 train_model = true
 forecast = true
 make_plots = true
@@ -11,6 +11,7 @@ write_sample_data = false
 
 [paths]
 data_file = data/ssa_sai_all_indicators.xlsx
+packaged_data_file = package://safira/resources/safira_ssa_worldbank_snapshot.xlsx
 sheet_name = All_Indicators
 figures_dir = figures
 model_weights = models/time_series_sai_model_weights.pth
@@ -21,7 +22,7 @@ world_file =
 
 [data]
 start_year = 2000
-end_year = 2024
+end_year = 2026
 countries = SSA
 validate_country_codes = true
 connectivity_check = false

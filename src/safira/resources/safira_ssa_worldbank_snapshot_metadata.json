@@ -1,0 +1,36 @@
+{
+  "package": "safira-ssa",
+  "snapshot_created": "2026-06-23",
+  "source": "World Bank API",
+  "api_base_url": "https://api.worldbank.org/v2",
+  "sources": [
+    {
+      "id": "2",
+      "code": "WDI",
+      "name": "World Development Indicators",
+      "last_updated": "2026-04-08"
+    },
+    {
+      "id": "3",
+      "code": "WGI",
+      "name": "Worldwide Governance Indicators",
+      "last_updated": "2026-03-18"
+    }
+  ],
+  "years_requested": [
+    2000,
+    2026
+  ],
+  "raw_year_min": 2000,
+  "raw_year_max": 2025,
+  "prepared_year_min": 2000,
+  "prepared_year_max": 2025,
+  "country_count_configured": 46,
+  "country_count_in_file": 46,
+  "indicator_count_configured": 73,
+  "indicator_columns_in_file": 73,
+  "raw_rows": 1194,
+  "prepared_rows": 1089,
+  "sheet_name": "All_Indicators",
+  "file_name": "safira_ssa_worldbank_snapshot.xlsx"
+}

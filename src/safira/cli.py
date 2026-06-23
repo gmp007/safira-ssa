@@ -18,11 +18,11 @@ from .constants import DEFAULT_INPUT_FILE
 from .data import collect_world_bank_panel, prepare_panel, write_sample_panel
 
 
-def _build_forecaster(config, force_pretrained: bool = False):
+def _build_forecaster(config, data_path: str, force_pretrained: bool = False):
     from .forecast import SkillAdvancementForecaster
 
     return SkillAdvancementForecaster(
-        data_path=cfg_get(config, "paths", "data_file"),
+        data_path=data_path,
         sheet_name=cfg_get(config, "paths", "sheet_name", "All_Indicators"),
         lookback=cfg_int(config, "model", "lookback", 5),
         hidden_dim=cfg_int(config, "model", "hidden_dim", 32),
@@ -44,28 +44,51 @@ def _build_forecaster(config, force_pretrained: bool = False):
     )
 
 
+def _data_mode(config) -> str:
+    """Return the configured data source mode."""
+    mode = cfg_get(config, "workflow", "data_mode", "").lower()
+    if mode:
+        return mode
+    return "download" if cfg_bool(config, "workflow", "fetch_data", False) else "custom"
+
+
+def _workflow_data_file(config) -> str:
+    """Resolve the data path for packaged, download, or custom workflows."""
+    mode = _data_mode(config)
+    if mode == "packaged":
+        return cfg_get(config, "paths", "packaged_data_file", "packaged") or "packaged"
+    if mode in {"download", "custom"}:
+        return cfg_get(config, "paths", "data_file")
+    raise ValueError("workflow.data_mode must be one of: packaged, download, custom.")
+
+
 def run_workflow(input_file: str = DEFAULT_INPUT_FILE) -> None:
     """Run the configured SAFIRA-SSA workflow."""
     config = read_config(input_file)
+    data_mode = _data_mode(config)
 
     if cfg_bool(config, "workflow", "write_sample_data", False):
         sample_path = cfg_get(config, "paths", "sample_data_file", "examples/sample_sai_panel.xlsx")
         write_sample_panel(sample_path)
         print(f"[INFO] Wrote sample panel: {sample_path}")
 
-    data_file = cfg_get(config, "paths", "data_file")
+    data_file = _workflow_data_file(config)
+    download_file = cfg_get(config, "paths", "data_file")
     sheet_name = cfg_get(config, "paths", "sheet_name", "All_Indicators")
 
-    if cfg_bool(config, "workflow", "fetch_data", False):
+    if data_mode == "download":
         collect_world_bank_panel(
-            output_file=data_file,
+            output_file=download_file,
             countries=cfg_get(config, "data", "countries", "SSA"),
             start_year=cfg_int(config, "data", "start_year", 2000),
-            end_year=cfg_int(config, "data", "end_year", 2024),
+            end_year=cfg_int(config, "data", "end_year", 2026),
             sheet_name=sheet_name,
             validate_codes=cfg_bool(config, "data", "validate_country_codes", True),
             connectivity_check=cfg_bool(config, "data", "connectivity_check", False),
         )
+        data_file = download_file
+    elif data_mode == "packaged":
+        print("[INFO] Using packaged World Bank snapshot.")
 
     train_model = cfg_bool(config, "workflow", "train_model", True)
     forecast_requested = cfg_bool(config, "workflow", "forecast", True)
@@ -74,7 +97,7 @@ def run_workflow(input_file: str = DEFAULT_INPUT_FILE) -> None:
     prepared_df = None
     forecaster = None
     if train_model or forecast_requested:
-        forecaster = _build_forecaster(config, force_pretrained=not train_model)
+        forecaster = _build_forecaster(config, data_path=data_file, force_pretrained=not train_model)
         if train_model:
             prepared_df = forecaster.fit_or_load()
         elif forecast_requested:
@@ -124,7 +147,7 @@ def fetch_data(input_file: str = DEFAULT_INPUT_FILE) -> None:
         output_file=cfg_get(config, "paths", "data_file"),
         countries=cfg_get(config, "data", "countries", "SSA"),
         start_year=cfg_int(config, "data", "start_year", 2000),
-        end_year=cfg_int(config, "data", "end_year", 2024),
+        end_year=cfg_int(config, "data", "end_year", 2026),
         sheet_name=cfg_get(config, "paths", "sheet_name", "All_Indicators"),
         validate_codes=cfg_bool(config, "data", "validate_country_codes", True),
         connectivity_check=cfg_bool(config, "data", "connectivity_check", False),

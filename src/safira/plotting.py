@@ -694,8 +694,9 @@ class SAIPlotter:
     def zip_figures(self, zip_name: str = "figures.zip") -> str:
         """Archive generated figure files."""
         zip_path = Path(zip_name)
-        if not zip_path.is_absolute():
+        if not zip_path.is_absolute() and zip_path.parent == Path("."):
             zip_path = self.figures_dir.parent / zip_name
+        zip_path.parent.mkdir(parents=True, exist_ok=True)
         with zipfile.ZipFile(zip_path, "w", zipfile.ZIP_DEFLATED) as zf:
             for root, _, files in os.walk(self.figures_dir):
                 for filename in files:

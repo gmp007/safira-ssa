@@ -8,6 +8,7 @@ PROJECT_LONG_NAME = "Skill Advancement Forecasting and Intelligence for Readines
 DEFAULT_INPUT_FILE = "safira.in"
 DEFAULT_SHEET_NAME = "All_Indicators"
 DEFAULT_DATA_FILE = "data/ssa_sai_all_indicators.xlsx"
+DEFAULT_PACKAGED_DATA_FILE = "package://safira/resources/safira_ssa_worldbank_snapshot.xlsx"
 DEFAULT_FIGURES_DIR = "figures"
 DEFAULT_MODEL_WEIGHTS = "models/time_series_sai_model_weights.pth"
 DEFAULT_MODEL_ASSETS = "models/time_series_sai_assets.pkl"
@@ -339,13 +340,21 @@ WORLD_BANK_INDICATORS = {'Secure_Internet_Servers': {'code': 'IT.NET.SECR',
  'Mortality_Rate_U5': {'code': 'SH.DYN.MORT',
                        'description': 'Mortality rate, under-5 (per 1,000 live births).'},
  'Gov_Effectiveness': {'code': 'GE.EST',
+                       'source_id': '3',
+                       'source_code': 'GOV_WGI_GE.EST',
                        'description': 'Government effectiveness: Estimate (-2.5 = weak; +2.5 = '
                                       'strong).'},
  'Regulatory_Quality': {'code': 'RQ.EST',
+                        'source_id': '3',
+                        'source_code': 'GOV_WGI_RQ.EST',
                         'description': 'Regulatory quality estimate (-2.5 = weak; +2.5 = strong).'},
  'Rule_of_Law': {'code': 'RL.EST',
+                 'source_id': '3',
+                 'source_code': 'GOV_WGI_RL.EST',
                  'description': 'Rule of law estimate (-2.5 = weak; +2.5 = strong).'},
  'Control_of_Corruption': {'code': 'CC.EST',
+                           'source_id': '3',
+                           'source_code': 'GOV_WGI_CC.EST',
                            'description': 'Control of corruption estimate (-2.5 = weak; +2.5 = '
                                           'strong).'}}
 

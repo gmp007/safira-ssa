@@ -1,7 +1,7 @@
 # SAFIRA-SSA sample input for a fast local smoke run.
 
 [workflow]
-fetch_data = false
+data_mode = custom
 train_model = false
 forecast = false
 make_plots = false
@@ -10,6 +10,7 @@ write_sample_data = true
 
 [paths]
 data_file = examples/sample_sai_panel.xlsx
+packaged_data_file = package://safira/resources/safira_ssa_worldbank_snapshot.xlsx
 sheet_name = All_Indicators
 figures_dir = examples/figures
 model_weights = examples/models/time_series_sai_model_weights.pth

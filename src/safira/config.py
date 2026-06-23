@@ -13,6 +13,7 @@ from .constants import (
     DEFAULT_LEGACY_MODEL,
     DEFAULT_MODEL_ASSETS,
     DEFAULT_MODEL_WEIGHTS,
+    DEFAULT_PACKAGED_DATA_FILE,
 )
 
 
@@ -20,7 +21,7 @@ DEFAULT_INPUT_TEXT = f"""# SAFIRA-SSA input file
 # Lines beginning with # are comments. Values can be changed without editing Python code.
 
 [workflow]
-fetch_data = false
+data_mode = packaged
 train_model = true
 forecast = true
 make_plots = true
@@ -29,6 +30,7 @@ write_sample_data = false
 
 [paths]
 data_file = {DEFAULT_DATA_FILE}
+packaged_data_file = {DEFAULT_PACKAGED_DATA_FILE}
 sheet_name = All_Indicators
 figures_dir = {DEFAULT_FIGURES_DIR}
 model_weights = {DEFAULT_MODEL_WEIGHTS}
@@ -39,7 +41,7 @@ world_file =
 
 [data]
 start_year = 2000
-end_year = 2024
+end_year = 2026
 countries = SSA
 validate_country_codes = true
 connectivity_check = false
