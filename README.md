@@ -2,13 +2,13 @@
 
 **Skill Advancement Forecasting and Intelligence for Readiness in Africa, Sub-Saharan Africa**
 
-SAFIRA-SSA is a policy-facing research package for measuring and forecasting skills readiness in Sub-Saharan Africa in the age of artificial intelligence, automation, and workforce transformation. It implements the workflow behind the paper *Forecasting the Future of Skills in Sub-Saharan Africa: AI, Automation, and the Skill Advancement Index* as a reusable Python package that can be installed, configured, rerun, tested, and extended outside the original notebook.
+SAFIRA-SSA is a policy-facing research package for measuring, forecasting, and comparing skills readiness in Sub-Saharan Africa in the age of artificial intelligence, automation, and workforce transformation. It provides a reproducible decision-support workflow for constructing the Skill Advancement Index (SAI), refreshing or reusing World Bank data, forecasting country trajectories, and generating diagnostics that can inform education, labour-market, digital-readiness, and workforce-development strategy.
 
 At its core, SAFIRA-SSA operationalizes the **Skill Advancement Index (SAI)**: a multidimensional index designed to capture the structural conditions that shape national workforce readiness. The framework combines internationally comparable World Bank indicators across foundational education, advanced and technical skills, digital readiness, and labour-market alignment. It then uses time-series forecasting to project country-level skill-readiness trajectories and generates diagnostic figures for comparing countries, pillars, regional patterns, and future trajectories.
 
 The package is designed for researchers, policymakers, development practitioners, education planners, labour-market analysts, and institutions interested in evidence-based skills strategy. It is not intended to replace local knowledge or policy judgment. Instead, it provides a transparent analytical framework for asking sharper questions about where AI-era skills gaps are emerging, which readiness dimensions appear to constrain progress, and where targeted investments in education, digital infrastructure, and technical training may be most urgent.
 
-The code was refactored from the original `PSAIM_WB_Forecast.ipynb` notebook into a modern package layout so it can be installed with `pip install .`, run from a command line, tested, reused offline with packaged data, refreshed online from the World Bank API, and hosted on GitHub/PyPI.
+The package is organized for practical reuse: it can be installed with `pip install .`, controlled through a plain-text `safira.in` file, run from the command line, tested, used offline with packaged data, and refreshed online from the World Bank API when updated evidence is needed.
 
 ## Authors
 
@@ -28,7 +28,7 @@ SAFIRA-SSA turns this policy challenge into a reproducible analytical workflow. 
 - Where might progress plateau without stronger investment in digital readiness, education reform, or technical training?
 - How can policymakers use common indicators to compare readiness while still adapting interventions to national contexts?
 
-The manuscript motivating this code finds substantial divergence in skills readiness across SSA countries and identifies digital readiness and advanced technical skills as especially important drivers of overall skills advancement. SAFIRA-SSA provides the computational machinery for reproducing and extending that analysis.
+Applied analyses with SAFIRA-SSA can reveal substantial divergence in skills readiness across SSA countries and help identify whether digital readiness, advanced technical skills, foundational education, or labour-market alignment are the strongest constraints on overall skills advancement.
 
 ## What SAFIRA-SSA Does
 
@@ -44,7 +44,7 @@ SAFIRA-SSA supports a complete research-to-policy analysis workflow:
 4. Trains an LSTM sequence model over country SAI histories.
 5. Saves model weights and non-tensor assets separately for safer reloads.
 6. Forecasts future SAI values for a selected country and year.
-7. Generates the major comparison plots from the notebook, including trajectories, pillar heatmaps, regional boxes, GDP-SAI scatter plots, correlation plots, slope plots, radar plots, UMAP plots, forecast diagnostics, Nigeria peer comparisons, and SSA median future projections.
+7. Generates major comparison and diagnostic plots, including trajectories, pillar heatmaps, regional boxes, GDP-SAI scatter plots, correlation plots, slope plots, radar plots, UMAP plots, forecast diagnostics, Nigeria peer comparisons, and SSA median future projections.
 
 ## Policy and Development Uses
 
@@ -63,7 +63,7 @@ The output should be interpreted as decision support, not as a deterministic pol
 
 ## Methodological Overview
 
-The package follows the same broad logic as the accompanying paper:
+The package follows a transparent analytical sequence:
 
 1. **Indicator collection**: gather country-year World Bank indicators for Sub-Saharan Africa.
 2. **Domain construction**: organize indicators into the SAI domains of foundational education, advanced and technical skills, digital readiness, and labour-market alignment.
@@ -71,7 +71,7 @@ The package follows the same broad logic as the accompanying paper:
 4. **Forecasting**: train or reload a Long Short-Term Memory (LSTM) time-series model over country SAI histories.
 5. **Diagnostics and visualization**: generate figures that compare trajectories, pillar profiles, correlations, country clusters, peer comparisons, forecast diagnostics, and future regional projections.
 
-This structure makes the code useful both as a manuscript companion and as a starting point for new country panels, updated World Bank data pulls, or modified skills-readiness frameworks.
+This structure makes the code useful for recurring skills-readiness monitoring, new country panels, updated World Bank data pulls, or modified skills-readiness frameworks.
 
 ## Repository Layout
 
@@ -196,7 +196,7 @@ You can create a fresh copy at any time:
 safira write-input --output safira.in --overwrite
 ```
 
-The default `safira.in` follows the original notebook defaults as closely as possible: the packaged 2000-2025 World Bank snapshot, univariate `SAI_scaled` LSTM input, Nigeria 2025 forecast, and the full plot set from the notebook's “MAIN - call whichever plots you want” block.
+The default `safira.in` is configured for a complete first run: the packaged 2000-2025 World Bank snapshot, univariate `SAI_scaled` LSTM input, Nigeria 2025 forecast, and the full diagnostic plot set.
 
 ### Common Data Setups
 
@@ -297,7 +297,7 @@ Controls where files are read from and written to.
 | `figures_dir` | `figures` | Directory where plots are saved. Created automatically if needed. |
 | `model_weights` | `models/time_series_sai_model_weights.pth` | PyTorch model weights file written after training and read when loading a saved model. |
 | `model_assets` | `models/time_series_sai_assets.pkl` | Non-tensor model assets such as scalers, feature names, and training settings. |
-| `legacy_model` | `models/time_series_sai_model.pth` | Legacy single-file model path kept for compatibility with older notebook-style saves. |
+| `legacy_model` | `models/time_series_sai_model.pth` | Legacy single-file model path kept for compatibility with older saved-model artifacts. |
 | `sample_data_file` | `examples/sample_sai_panel.xlsx` | Output path used when `write_sample_data = true` or when running `safira write-sample-data`. |
 | `world_file` | blank | Optional local Natural Earth world boundary file for choropleth maps. Leave blank unless you have a local map file. |
 
@@ -360,7 +360,7 @@ Controls figure generation.
 | Option | Default | Meaning |
 | --- | --- | --- |
 | `show` | `false` | Whether plots should open interactively. Keep `false` for batch runs and servers. |
-| `selected` | full notebook plot list | Comma-separated plot names to generate. Remove names to make a shorter run. |
+| `selected` | full diagnostic plot list | Comma-separated plot names to generate. Remove names to make a shorter run. |
 | `forecast_diag_countries` | `NGA, CIV, KEN, CMR, RWA, GHA` | Countries used by `forecast_diag`. Requires saved model weights and assets. |
 | `selected_country_codes` | `KEN, RWA, GHA, ZAF, NGA, COD` | Countries highlighted by selected spaghetti plots. |
 | `nigeria_peers` | `RWA, UGA, KEN, GHA` | Peer countries used by Nigeria comparison plots. |
@@ -419,7 +419,7 @@ Snapshot contents:
 - World Development Indicators source last updated by World Bank on 2026-04-08.
 - Worldwide Governance Indicators source last updated by World Bank on 2026-03-18.
 
-Live refreshes use the official World Bank JSON API directly. Standard WDI indicators are read through the country-indicator endpoint, while the governance indicators are read from World Bank source `3`, Worldwide Governance Indicators, using the correct `GOV_WGI_*` source series IDs. The indicator list lives in `src/safira/constants.py` and was extracted directly from the notebook to avoid transcription drift.
+Live refreshes use the official World Bank JSON API directly. Standard WDI indicators are read through the country-indicator endpoint, while the governance indicators are read from World Bank source `3`, Worldwide Governance Indicators, using the correct `GOV_WGI_*` source series IDs. The indicator list lives in `src/safira/constants.py` so data definitions remain explicit and auditable.
 
 Default output:
 
@@ -446,7 +446,7 @@ country_code
 
 ## Forecasting Workflow
 
-The forecasting class is `safira.forecast.SkillAdvancementForecaster`. The legacy notebook class name `psai` remains available as an alias.
+The forecasting class is `safira.forecast.SkillAdvancementForecaster`. The legacy class name `psai` remains available as an alias.
 
 Model artifacts are split into:
 
@@ -484,7 +484,7 @@ For a short plotting run, use only a few names:
 selected = spaghetti, box, corr_lower
 ```
 
-For the full notebook-style plotting run, keep the default list:
+For the full diagnostic plotting run, keep the default list:
 
 ```ini
 [workflow]
@@ -567,7 +567,7 @@ pip install ".[full]"
 
 - The packaged snapshot is fixed at build time so offline users can reproduce the bundled run. Use `data_mode = download` or `safira fetch-data` to refresh from the live World Bank API.
 - Live World Bank results can change if the World Bank revises historical series, changes indicator coverage, or adds newer years.
-- The notebook's original full workflow trains an LSTM, so exact model weights may vary unless the runtime, dependencies, random seeds, and hardware behavior are fixed.
+- The full workflow trains an LSTM, so exact model weights may vary unless the runtime, dependencies, random seeds, and hardware behavior are fixed.
 - The sample panel is synthetic and exists only for testing package mechanics. It is not a substitute for the World Bank data used in the actual research workflow.
 
 ## Citing the Paper and Code
