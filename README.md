@@ -2,18 +2,37 @@
 
 **Skill Advancement Forecasting and Intelligence for Readiness in Africa, Sub-Saharan Africa**
 
-SAFIRA-SSA packages the notebook workflow for *Forecasting the Future of Skills in Sub-Saharan Africa: AI, Automation, and the Skill Advancement Index* into a reusable Python project. It uses a packaged World Bank snapshot by default, can refresh that data from the World Bank API when internet access is available, builds the Skill Advancement Index (SAI), trains or reloads an LSTM forecaster, produces country-year forecasts, and generates the figures used to compare SAI trajectories, pillars, regions, and country profiles.
+SAFIRA-SSA is a policy-facing research package for measuring and forecasting skills readiness in Sub-Saharan Africa in the age of artificial intelligence, automation, and workforce transformation. It implements the workflow behind the paper *Forecasting the Future of Skills in Sub-Saharan Africa: AI, Automation, and the Skill Advancement Index* as a reusable Python package that can be installed, configured, rerun, tested, and extended outside the original notebook.
 
-The code was refactored from the original `PSAIM_WB_Forecast.ipynb` notebook into a modern package layout so it can be installed with `pip install .`, run from a command line, tested, and hosted on GitHub/PyPI.
+At its core, SAFIRA-SSA operationalizes the **Skill Advancement Index (SAI)**: a multidimensional index designed to capture the structural conditions that shape national workforce readiness. The framework combines internationally comparable World Bank indicators across foundational education, advanced and technical skills, digital readiness, and labour-market alignment. It then uses time-series forecasting to project country-level skill-readiness trajectories and generates diagnostic figures for comparing countries, pillars, regional patterns, and future trajectories.
+
+The package is designed for researchers, policymakers, development practitioners, education planners, labour-market analysts, and institutions interested in evidence-based skills strategy. It is not intended to replace local knowledge or policy judgment. Instead, it provides a transparent analytical framework for asking sharper questions about where AI-era skills gaps are emerging, which readiness dimensions appear to constrain progress, and where targeted investments in education, digital infrastructure, and technical training may be most urgent.
+
+The code was refactored from the original `PSAIM_WB_Forecast.ipynb` notebook into a modern package layout so it can be installed with `pip install .`, run from a command line, tested, reused offline with packaged data, refreshed online from the World Bank API, and hosted on GitHub/PyPI.
 
 ## Authors
 
 - **Chinedu Ekuma**
 - **Kelechi Ekuma**
 
+## Why This Package Matters
+
+AI and automation are changing the skill profile required for productive participation in the global economy. For Sub-Saharan Africa, this transition is especially consequential. The region combines a large and growing youth population with uneven educational quality, infrastructure gaps, expanding digital connectivity, high unemployment in many countries, and heterogeneous readiness for technology-intensive labour markets.
+
+SAFIRA-SSA turns this policy challenge into a reproducible analytical workflow. It helps users move from broad statements about "future skills" to country-year evidence, pillar-level diagnosis, and forward-looking trajectories. The package can help answer questions such as:
+
+- Which countries show improving, stagnant, or declining skills-readiness trajectories?
+- Are readiness gaps driven primarily by foundational education, advanced technical capacity, digital infrastructure, or labour-market alignment?
+- Which countries are peers or outliers when SAI trajectories are compared over time?
+- How does skills readiness relate to macro-development indicators such as GDP growth?
+- Where might progress plateau without stronger investment in digital readiness, education reform, or technical training?
+- How can policymakers use common indicators to compare readiness while still adapting interventions to national contexts?
+
+The manuscript motivating this code finds substantial divergence in skills readiness across SSA countries and identifies digital readiness and advanced technical skills as especially important drivers of overall skills advancement. SAFIRA-SSA provides the computational machinery for reproducing and extending that analysis.
+
 ## What SAFIRA-SSA Does
 
-SAFIRA-SSA supports a complete research-to-analysis workflow:
+SAFIRA-SSA supports a complete research-to-policy analysis workflow:
 
 1. Loads a packaged country-year World Bank panel for Sub-Saharan Africa, or downloads a fresh panel on demand.
 2. Builds the **Skill Advancement Index (SAI)** on a 0 to 100 scale.
@@ -26,6 +45,33 @@ SAFIRA-SSA supports a complete research-to-analysis workflow:
 5. Saves model weights and non-tensor assets separately for safer reloads.
 6. Forecasts future SAI values for a selected country and year.
 7. Generates the major comparison plots from the notebook, including trajectories, pillar heatmaps, regional boxes, GDP-SAI scatter plots, correlation plots, slope plots, radar plots, UMAP plots, forecast diagnostics, Nigeria peer comparisons, and SSA median future projections.
+
+## Policy and Development Uses
+
+SAFIRA-SSA is intended to support anticipatory skills planning rather than retrospective reporting alone. The package can be used to produce evidence for:
+
+| Use case | How SAFIRA-SSA helps |
+| --- | --- |
+| National skills strategy | Tracks SAI and pillar trends to identify whether bottlenecks are educational, technical, digital, or labour-market related. |
+| AI-readiness planning | Highlights digital and advanced-skills deficits that may limit participation in AI-enabled labour markets. |
+| Education and training reform | Connects foundational and advanced-skills indicators to forecasted readiness trajectories. |
+| Regional benchmarking | Compares countries and peer groups using common indicators and reproducible visual diagnostics. |
+| Investment prioritization | Helps identify where infrastructure, tertiary training, research capacity, or labour-market alignment may require attention. |
+| Scenario preparation | Uses forecast trajectories to inform discussions about future readiness, plateau risks, and policy urgency. |
+
+The output should be interpreted as decision support, not as a deterministic policy prescription. Forecasts are only as strong as the underlying indicators, historical coverage, modeling assumptions, and data revisions. Users should combine SAFIRA-SSA outputs with country-specific institutional knowledge, qualitative evidence, and stakeholder engagement.
+
+## Methodological Overview
+
+The package follows the same broad logic as the accompanying paper:
+
+1. **Indicator collection**: gather country-year World Bank indicators for Sub-Saharan Africa.
+2. **Domain construction**: organize indicators into the SAI domains of foundational education, advanced and technical skills, digital readiness, and labour-market alignment.
+3. **Index construction**: normalize and aggregate available indicators into a 0 to 100 SAI scale.
+4. **Forecasting**: train or reload a Long Short-Term Memory (LSTM) time-series model over country SAI histories.
+5. **Diagnostics and visualization**: generate figures that compare trajectories, pillar profiles, correlations, country clusters, peer comparisons, forecast diagnostics, and future regional projections.
+
+This structure makes the code useful both as a manuscript companion and as a starting point for new country panels, updated World Bank data pulls, or modified skills-readiness frameworks.
 
 ## Repository Layout
 
@@ -523,6 +569,38 @@ pip install ".[full]"
 - Live World Bank results can change if the World Bank revises historical series, changes indicator coverage, or adds newer years.
 - The notebook's original full workflow trains an LSTM, so exact model weights may vary unless the runtime, dependencies, random seeds, and hardware behavior are fixed.
 - The sample panel is synthetic and exists only for testing package mechanics. It is not a substitute for the World Bank data used in the actual research workflow.
+
+## Citing the Paper and Code
+
+SAFIRA-SSA accompanies the preprint:
+
+```text
+Forecasting the Future of Skills in Sub-Saharan Africa:
+AI, Automation, and the Skill Advancement Index
+```
+
+If you use SAFIRA-SSA, the packaged World Bank snapshot, the SAI construction workflow, the LSTM forecasting workflow, or any part of the repository resources in academic work, policy analysis, reports, teaching, or derivative software, please cite the accompanying paper and acknowledge the code repository.
+
+Suggested preprint citation:
+
+```text
+Ekuma, K., and Ekuma, C. Forecasting the Future of Skills in Sub-Saharan Africa:
+AI, Automation, and the Skill Advancement Index. Preprint, 2026.
+Code: https://github.com/gmp007/safira-ssa
+```
+
+BibTeX placeholder:
+
+```bibtex
+@misc{ekuma2026safira,
+  title  = {Forecasting the Future of Skills in Sub-Saharan Africa: AI, Automation, and the Skill Advancement Index},
+  author = {Ekuma, Kelechi and Ekuma, Chinedu},
+  year   = {2026},
+  note   = {Preprint. Code available at https://github.com/gmp007/safira-ssa}
+}
+```
+
+The citation details will be updated once the manuscript is formally published.
 
 ## License
 
