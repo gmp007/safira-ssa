@@ -2,11 +2,11 @@
 
 **Skill Advancement Forecasting and Intelligence for Readiness in Africa, Sub-Saharan Africa**
 
-SAFIRA-SSA is a policy-facing research package for measuring, forecasting, and comparing skills readiness in Sub-Saharan Africa in the age of artificial intelligence, automation, and workforce transformation. It provides a reproducible decision-support workflow for constructing the Skill Advancement Index (SAI), refreshing or reusing World Bank data, forecasting country trajectories, and generating diagnostics that can inform education, labour-market, digital-readiness, and workforce-development strategy.
+SAFIRA-SSA is a policy-facing research package for measuring, forecasting, and comparing skills readiness in Sub-Saharan Africa in the age of artificial intelligence, automation, and workforce transformation. It provides a reproducible decision-support workflow for constructing the Skill Advancement Index (SAI), refreshing or reusing World Bank data, forecasting country trajectories, and generating diagnostics that can inform education, labor-market, digital-readiness, and workforce-development strategy.
 
-At its core, SAFIRA-SSA operationalizes the **Skill Advancement Index (SAI)**: a multidimensional index designed to capture the structural conditions that shape national workforce readiness. The framework combines internationally comparable World Bank indicators across foundational education, advanced and technical skills, digital readiness, and labour-market alignment. It then uses time-series forecasting to project country-level skill-readiness trajectories and generates diagnostic figures for comparing countries, pillars, regional patterns, and future trajectories.
+At its core, SAFIRA-SSA operationalizes the **Skill Advancement Index (SAI)**: a multidimensional index designed to capture the structural conditions that shape national workforce readiness. The framework combines internationally comparable World Bank indicators across foundational education, advanced and technical skills, digital readiness, and labor-market alignment. It then uses time-series forecasting to project country-level skill-readiness trajectories and generates diagnostic figures for comparing countries, pillars, regional patterns, and future trajectories.
 
-The package is designed for researchers, policymakers, development practitioners, education planners, labour-market analysts, and institutions interested in evidence-based skills strategy. It is not intended to replace local knowledge or policy judgment. Instead, it provides a transparent analytical framework for asking sharper questions about where AI-era skills gaps are emerging, which readiness dimensions appear to constrain progress, and where targeted investments in education, digital infrastructure, and technical training may be most urgent.
+The package is designed for researchers, policymakers, development practitioners, education planners, labor-market analysts, and institutions interested in evidence-based skills strategy. It is not intended to replace local knowledge or policy judgment. Instead, it provides a transparent analytical framework for asking sharper questions about where AI-era skills gaps are emerging, which readiness dimensions appear to constrain progress, and where targeted investments in education, digital infrastructure, and technical training may be most urgent.
 
 The package is organized for practical reuse: it can be installed with `pip install .`, controlled through a plain-text `safira.in` file, run from the command line, tested, used offline with packaged data, and refreshed online from the World Bank API when updated evidence is needed.
 
@@ -17,18 +17,18 @@ The package is organized for practical reuse: it can be installed with `pip inst
 
 ## Why This Package Matters
 
-AI and automation are changing the skill profile required for productive participation in the global economy. For Sub-Saharan Africa, this transition is especially consequential. The region combines a large and growing youth population with uneven educational quality, infrastructure gaps, expanding digital connectivity, high unemployment in many countries, and heterogeneous readiness for technology-intensive labour markets.
+AI and automation are changing the skill profile required for productive participation in the global economy. For Sub-Saharan Africa, this transition is especially consequential. The region combines a large and growing youth population with uneven educational quality, infrastructure gaps, expanding digital connectivity, high unemployment in many countries, and heterogeneous readiness for technology-intensive labor markets.
 
 SAFIRA-SSA turns this policy challenge into a reproducible analytical workflow. It helps users move from broad statements about "future skills" to country-year evidence, pillar-level diagnosis, and forward-looking trajectories. The package can help answer questions such as:
 
 - Which countries show improving, stagnant, or declining skills-readiness trajectories?
-- Are readiness gaps driven primarily by foundational education, advanced technical capacity, digital infrastructure, or labour-market alignment?
+- Are readiness gaps driven primarily by foundational education, advanced technical capacity, digital infrastructure, or labor-market alignment?
 - Which countries are peers or outliers when SAI trajectories are compared over time?
 - How does skills readiness relate to macro-development indicators such as GDP growth?
 - Where might progress plateau without stronger investment in digital readiness, education reform, or technical training?
 - How can policymakers use common indicators to compare readiness while still adapting interventions to national contexts?
 
-Applied analyses with SAFIRA-SSA can reveal substantial divergence in skills readiness across SSA countries and help identify whether digital readiness, advanced technical skills, foundational education, or labour-market alignment are the strongest constraints on overall skills advancement.
+Applied analyses with SAFIRA-SSA can reveal substantial divergence in skills readiness across SSA countries and help identify whether digital readiness, advanced technical skills, foundational education, or labor-market alignment are the strongest constraints on overall skills advancement.
 
 ## What SAFIRA-SSA Does
 
@@ -52,11 +52,11 @@ SAFIRA-SSA is intended to support anticipatory skills planning rather than retro
 
 | Use case | How SAFIRA-SSA helps |
 | --- | --- |
-| National skills strategy | Tracks SAI and pillar trends to identify whether bottlenecks are educational, technical, digital, or labour-market related. |
-| AI-readiness planning | Highlights digital and advanced-skills deficits that may limit participation in AI-enabled labour markets. |
+| National skills strategy | Tracks SAI and pillar trends to identify whether bottlenecks are educational, technical, digital, or labor-market related. |
+| AI-readiness planning | Highlights digital and advanced-skills deficits that may limit participation in AI-enabled labor markets. |
 | Education and training reform | Connects foundational and advanced-skills indicators to forecasted readiness trajectories. |
 | Regional benchmarking | Compares countries and peer groups using common indicators and reproducible visual diagnostics. |
-| Investment prioritization | Helps identify where infrastructure, tertiary training, research capacity, or labour-market alignment may require attention. |
+| Investment prioritization | Helps identify where infrastructure, tertiary training, research capacity, or labor-market alignment may require attention. |
 | Scenario preparation | Uses forecast trajectories to inform discussions about future readiness, plateau risks, and policy urgency. |
 
 The output should be interpreted as decision support, not as a deterministic policy prescription. Forecasts are only as strong as the underlying indicators, historical coverage, modeling assumptions, and data revisions. Users should combine SAFIRA-SSA outputs with country-specific institutional knowledge, qualitative evidence, and stakeholder engagement.
@@ -66,7 +66,7 @@ The output should be interpreted as decision support, not as a deterministic pol
 The package follows a transparent analytical sequence:
 
 1. **Indicator collection**: gather country-year World Bank indicators for Sub-Saharan Africa.
-2. **Domain construction**: organize indicators into the SAI domains of foundational education, advanced and technical skills, digital readiness, and labour-market alignment.
+2. **Domain construction**: organize indicators into the SAI domains of foundational education, advanced and technical skills, digital readiness, and labor-market alignment.
 3. **Index construction**: normalize and aggregate available indicators into a 0 to 100 SAI scale.
 4. **Forecasting**: train or reload a Long Short-Term Memory (LSTM) time-series model over country SAI histories.
 5. **Diagnostics and visualization**: generate figures that compare trajectories, pillar profiles, correlations, country clusters, peer comparisons, forecast diagnostics, and future regional projections.
